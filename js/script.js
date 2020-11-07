@@ -14,7 +14,7 @@ fetch('https://js2-tareas-api.netlify.app/api/tareas?uid=21')
 .then((data) => {
     tareas = data
     // Inicialización de la lista del DOM, a partir de las tareas existentes.
-    for (let i = 0; i < tareas.length; i++) {
+    for (let i = 0; i < tareas.length; i += 1) {
       appendTaskDOM(tareas[i]);
     }
 });
@@ -38,8 +38,6 @@ function addTask(nombreTarea, fechaTarea, completoTarea) {
   fetch('https://js2-tareas-api.netlify.app/api/tareas?uid=21', fetchOptions)
   .then((response) => response.json())
   .then((data) => {
-      tareas = data
-      console.log(data);
         // Agrega la tarea al DOM.
       appendTaskDOM(data);
   });
@@ -48,53 +46,45 @@ function addTask(nombreTarea, fechaTarea, completoTarea) {
 // taskStatus(): Actualiza el estado de una tarea.
 function taskStatus(id, complete) {
   // Recorre la lista de tareas.
-  for (let i = 0; i < tareas.length; i++) {
+  let task = '';
+  for (let i = 0; i < tareas.length; i += 1) {
     // Cuando encuentra la tarea con el id correcto cambia su estado.
     if (tareas[i]._id === id) {
       tareas[i].complete = complete;
+      task = tareas[i];
       break;
     }
   }
 
   const fetchOptions = {
     method: 'PUT',
-    body: JSON.stringify(tareas),
+    body: JSON.stringify(task),
   };
-  fetch('https://js2-tareas-api.netlify.app/api/tareas/`${data._id}`?uid=21', fetchOptions)
+  fetch(`https://js2-tareas-api.netlify.app/api/tareas/${id}?uid=21`, fetchOptions)
   .then((response) => response.json())
   .then((data) => {
-      tareas = data
-      console.log(data);
-        // Agrega la tarea al DOM.
-      appendTaskDOM(data);
   });
-}
+};
 
 // deleteTask(): Borra una tarea.
 function deleteTask(id) {
   // Recorre la lista de tareas.
-  for (let i = 0; i < tareas.length; i++) {
+  for (let i = 0; i < tareas.length; i += 1) {
     // Cuando encuentra la tarea con el id correcto la borra.
     if (tareas[i]._id === id) {
       tareas.splice(i, 1);
       break;
     }
-  }
+  };
 
   const fetchOptions = {
-    method: 'DELETE',
-    body: JSON.stringify(tareas[i]._id),
+    method: 'DELETE'
   };
-  fetch('https://js2-tareas-api.netlify.app/api/tareas?uid=21', fetchOptions)
+  fetch(`https://js2-tareas-api.netlify.app/api/tareas/${id}?uid=21`, fetchOptions)
   .then((response) => response.json())
   .then((data) => {
-      tareas = data
-      console.log(data);
-        // Agrega la tarea al DOM.
-      appendTaskDOM(data);
   });
-}
-}
+};
 
 //
 // Vista.
@@ -112,6 +102,7 @@ function appendTaskDOM(tarea) {
   checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', `tarea-${tarea._id}`);
   checkbox.checked = tarea.complete;
+  checkbox.dataset.taskId = tarea._id;
   // Label.
   const label = document.createElement('label');
   label.setAttribute('for', `tarea-${tarea._id}`);
@@ -120,6 +111,7 @@ function appendTaskDOM(tarea) {
   const buttonDelete = document.createElement('button');
   buttonDelete.className = 'task-list__delete';
   buttonDelete.setAttribute('id', `delete-${tarea._id}`);
+  buttonDelete.dataset.taskId= tarea._id;
   buttonDelete.innerHTML = 'Borrar';
   // Se agregan elementos.
   item.appendChild(checkbox);
@@ -129,14 +121,12 @@ function appendTaskDOM(tarea) {
   // Evento para marcar tareas como completas.
   checkbox.addEventListener('click', (event) => {
     const complete = event.currentTarget.checked;
-    const itemId = event.currentTarget.getAttribute('id');
-    const taskId = parseInt(itemId.substring(6));
+    const taskId = event.currentTarget.dataset.taskId;
     taskStatus(taskId, complete);
   });
   // Evento para borrar tareas.
   buttonDelete.addEventListener('click', (event) => {
-    const itemId = event.currentTarget.getAttribute('id');
-    const taskId = parseInt(itemId.substring(7));
+    const taskId = event.currentTarget.dataset.taskId;
     deleteTask(taskId);
     // Borra la tarea en el DOM.
     event.currentTarget.parentNode.remove();
